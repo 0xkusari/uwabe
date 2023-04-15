@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { ethers } from "ethers";
+import { useEffect, useState } from 'react';
 
 export interface Input {
   internalType: string;
@@ -17,6 +18,7 @@ export interface ContractFunction {
   inputs: Input[];
   outputs: Output[];
   readonly: boolean;
+  abi: any;
 }
 
 export function ContractFunctionItem({
@@ -24,9 +26,18 @@ export function ContractFunctionItem({
   inputs,
   outputs,
   readonly,
+  abi,
 }: ContractFunction) {
 
   const [inputValues, setInputValues] = useState<string[]>([]);
+
+  const [windowEthereum, setWindowEthereum] = useState();
+
+  useEffect(() => {
+      const { ethereum } = window as any;
+
+      setWindowEthereum(ethereum);
+      }, []);
 
   const updateInputValues = (index: number, value: string) => {
     const newInputValues = [...inputValues];
@@ -36,6 +47,23 @@ export function ContractFunctionItem({
 
   const handleOnClick = (name: string) => {
     console.log(`${name}(${inputValues.join(",")})`);
+    if (windowEthereum) {
+      const provider = new ethers.providers.Web3Provider(windowEthereum);
+
+      // MetaMask requires requesting permission to connect users accounts
+      provider.send('eth_requestAccounts', []).then(console.log);
+
+      const signer = provider.getSigner();
+
+      const contract = new ethers.Contract(
+          "0x3e305a30df4b3681cdcbc3c42ad51cac82aea718",
+          abi,
+          provider
+          );
+
+      const contractWithSigner = contract.connect(signer);
+      contractWithSigner["programmer"]([]).then(console.log);
+    }
   };
 
   return (
