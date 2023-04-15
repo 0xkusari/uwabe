@@ -20,11 +20,10 @@ export default function ConfigPage() {
     const { ethereum } = window as any;
     setWindowEthereum(ethereum);
 
-    // https://goerli.etherscan.io/address/0x19e8c15AB9fcb315c7FAe4d392C9347c736326E4
+    // https://goerli.etherscan.io/address/0x95b01C4FDCFdcCdCABB0FD7d061BFFc106CB9aB4
     // 仮で設定 Infinite Garden
-    contractAddress = "0x95b01C4FDCFdcCdCABB0FD7d061BFFc106CB9";
     if (contractAddress) {
-      fetchContractData(contractAddress as string);
+      fetchContractData("0x95b01C4FDCFdcCdCABB0FD7d061BFFc106CB9aB4" as string);
     }
   });
 
