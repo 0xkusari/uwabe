@@ -11,3 +11,7 @@
   background-position: center top 80px;
   background-repeat: no-repeat;
 }
+
+.alert {
+  overflow: scroll;
+}
