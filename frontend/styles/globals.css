@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+#__next {
+  background-image: linear-gradient(to right, #2af598 0%, #009efd 100%);
+}
+
+.background {
+  background-image: url(/uwabe-background.png);
+  background-position: center top 80px;
+  background-repeat: no-repeat;
+}
+
+.alert {
+  overflow: scroll;
+}
