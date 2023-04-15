@@ -70,7 +70,7 @@ export default function ContractAddress() {
         };
       };
 
-      const exposeFunctions = fetchConfig();
+      const exposeFunctions: any[] = fetchConfig();
       const filtered = exposeFunctions.length > 0 ? functions.filter((func: any) => exposeFunctions?.indexOf(func.name) !== -1) : functions;
       setContractFunctions(filtered.map(mapper));
     }
