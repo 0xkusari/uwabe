@@ -73,7 +73,7 @@ export function ContractFunctionItem({
   };
 
   return (
-    <div className="card w-96 bg-base-100 shadow-xl m-4">
+    <div className="card w-[40rem] bg-base-100 shadow-xl m-4">
       <div className="card-body">
         <h2 className="card-title">{name}</h2>
         {inputs.map((input, index) => {
