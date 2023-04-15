@@ -54,10 +54,10 @@ contract UwabeConfigToken is ERC721, Ownable {
           bytes(
             abi.encodePacked(
               '{"name":"', tokenName(_tokenId),
-                '","description":"Otoshidama in Pochi Bukuro',
-                '","attributes":[",',
-                  '{"trait_type":"Contract","value":"', contractAddress, '"}',
-                  '{"trait_type":"Functions","value":"', functions, '"}',
+                '","description":"Uwabe: Your Smart Contract Interface',
+                '","attributes":[',
+                  '{"trait_type":"Contract","value":"', Strings.toHexString(contractAddress), '"},',
+                  '{"trait_type":"Functions","value":"', functions, '"},',
                   '{"trait_type":"Slug","value":"', slug, '"}',
                 '],"image":"https://0xkusari.github.io/uwabe/uwabe.jpg',
               '"}'
