@@ -19,6 +19,7 @@ export interface ContractFunction {
   outputs: Output[];
   readonly: boolean;
   abi: any;
+  contractAddress: string;
 }
 
 export function ContractFunctionItem({
@@ -31,6 +32,7 @@ export function ContractFunctionItem({
 }: ContractFunction) {
 
   const [inputValues, setInputValues] = useState<string[]>([]);
+  const [readResult, setReadResult] = useState<any>(null);
 
   const [windowEthereum, setWindowEthereum] = useState();
 
@@ -63,7 +65,10 @@ export function ContractFunctionItem({
           );
 
       const contractWithSigner = contract.connect(signer);
-      contractWithSigner[name](...inputValues).then(console.log);
+      contractWithSigner[name](...inputValues).then((result: any) => {
+        setReadResult(result.toString());
+      });
+      // contractWithSigner[name](...inputValues).then(console.table);
     }
   };
 
@@ -93,6 +98,7 @@ export function ContractFunctionItem({
         {readonly && (
           <div>{`=> ${outputs.map((output) => output.type).join(",")}`}</div>
         )}
+        {readResult && <p className="alert shadow-lg">{readResult}</p>}
       </div>
     </div>
   );
