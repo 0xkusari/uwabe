@@ -91,7 +91,7 @@ export default function ContractAddress() {
           ))}
         </ul>
       ) : (
-        <p>Loading...</p>
+        <progress className="progress w-56"></progress>
       )}
     </div>
   );
