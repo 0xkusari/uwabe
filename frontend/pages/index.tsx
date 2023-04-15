@@ -9,10 +9,12 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="card w-96 bg-base-100 shadow-xl items-center justify-center">
-        <div className="card-body">
-          <ContractForm onSubmit={handleSubmit} />
+    <div className="background">
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="card w-96 bg-base-100 shadow-xl items-center justify-center">
+          <div className="card-body">
+            <ContractForm onSubmit={handleSubmit} />
+          </div>
         </div>
       </div>
     </div>
