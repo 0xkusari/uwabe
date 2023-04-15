@@ -45,11 +45,8 @@ export default function ContractAddress() {
     //   // contractWithSigner[name](...inputValues).then(console.table);
     // }
 
-    return [
-      'balanceOf',
-      'designer',
-      'programmer',
-    ];
+    // here we can fetch the config from the contract
+    return [];
   };
 
   const fetchContractData = async (address: string) => {
@@ -74,8 +71,8 @@ export default function ContractAddress() {
       };
 
       const exposeFunctions = fetchConfig();
-      const filtered = functions.filter((func: any) => exposeFunctions?.indexOf(func.name) !== -1).map(mapper);
-      setContractFunctions(filtered);
+      const filtered = exposeFunctions.length > 0 ? functions.filter((func: any) => exposeFunctions?.indexOf(func.name) !== -1) : functions;
+      setContractFunctions(filtered.map(mapper));
     }
   };
 
