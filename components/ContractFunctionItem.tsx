@@ -26,6 +26,7 @@ export function ContractFunctionItem({
   inputs,
   outputs,
   readonly,
+  contractAddress,
   abi,
 }: ContractFunction) {
 
@@ -51,18 +52,18 @@ export function ContractFunctionItem({
       const provider = new ethers.providers.Web3Provider(windowEthereum);
 
       // MetaMask requires requesting permission to connect users accounts
-      provider.send('eth_requestAccounts', []).then(console.log);
+      //provider.send('eth_requestAccounts', []).then(console.log);
 
       const signer = provider.getSigner();
 
       const contract = new ethers.Contract(
-          "0x3e305a30df4b3681cdcbc3c42ad51cac82aea718",
+          contractAddress,
           abi,
           provider
           );
 
       const contractWithSigner = contract.connect(signer);
-      contractWithSigner["programmer"]([]).then(console.log);
+      contractWithSigner[name](...inputValues).then(console.log);
     }
   };
 
