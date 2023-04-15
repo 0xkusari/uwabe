@@ -54,7 +54,7 @@ export function ContractFunctionItem({
       const provider = new ethers.providers.Web3Provider(windowEthereum);
 
       // MetaMask requires requesting permission to connect users accounts
-      //provider.send('eth_requestAccounts', []).then(console.log);
+      provider.send('eth_requestAccounts', []).then(console.log);
 
       const signer = provider.getSigner();
 
