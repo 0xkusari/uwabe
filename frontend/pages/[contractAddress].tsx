@@ -10,7 +10,8 @@ import { configTokenAddress, configTokenAbi } from "@/components/ConfigToken";
 
 export default function ContractAddress() {
   const router = useRouter();
-  const { contractAddress } = router.query;
+  const { query } = router.query;
+  const [contractAddress, setContractAddress] = useState(null);
   const [contractFunctions, setContractFunctions] = useState<[] | null>(null);
   const [windowEthereum, setWindowEthereum] = useState();
   const [config, setConfig] = useState(null);
@@ -19,34 +20,27 @@ export default function ContractAddress() {
     const { ethereum } = window as any;
     setWindowEthereum(ethereum);
 
-    if (contractAddress) {
+    if (query) {
       // コントラクトアドレスではない場合は、slugからコントラクトアドレスを取得する
-      if (ethers.utils.isAddress(contractAddress as string) === false) {
-        // ConfigTokenから設定値を取得
-        // slug でNFTにアクセスして、コントラクトアドレスを取得。slugからtoken_idを取得
-        // 1. slug から token_id を取得
-        console.log("slugからtoken_idを取得");
-        console.log(contractAddress);
-        fetchConfig();
-        // 2. token_id から設定を取得
+      if (ethers.utils.isAddress(query as string)) {
+        setContractAddress(query);
       }
-      fetchContractData(contractAddress as string);
-      // 最後にフィルターかける。共通の処理
     }
   }, []);
 
   useEffect(() => {
+    if (contractAddress) {
+      return;
+    }
     fetchConfig(windowEthereum);
   }, [windowEthereum]);
 
   useEffect(() => {
     fetchContractData(contractAddress as string);
-  }, [config]);
+  }, [config, contractAddress]);
 
   const fetchConfig = (windowEthereum: any) => {
-    console.log(windowEthereum);
     if (windowEthereum) {
-      console.log("windowEthereumの中です");
       const provider = new ethers.providers.Web3Provider(windowEthereum);
       provider.send('eth_requestAccounts', []).then(console.log);
       const signer = provider.getSigner();
@@ -67,6 +61,7 @@ export default function ContractAddress() {
               const config = JSON.parse(decodedData);
               console.table(config);
               setConfig(config);
+              setContractAddress(config.attributes.filter((attr: any) => attr.trait_type === "Contract")[0].value);
           });
       });
       // contractWithSigner[name](...inputValues).then(console.table);
