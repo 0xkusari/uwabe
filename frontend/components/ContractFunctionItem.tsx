@@ -34,7 +34,7 @@ export function ContractFunctionItem({
 }: ContractFunction) {
 
   const [inputValues, setInputValues] = useState<string[]>([]);
-  const [payValue, setPayValue] = useState<string | null>(null);
+  const [payValue, setPayValue] = useState<string>("");
   const [result, setResult] = useState<any>(null);
 
   const [windowEthereum, setWindowEthereum] = useState();
@@ -69,7 +69,10 @@ export function ContractFunctionItem({
 
       const contractWithSigner = contract.connect(signer);
 
-      const option = { value: ethers.utils.parseEther("0.001") };
+      let option: { [key: string]: any } = {};
+      if (payable) {
+        option.value = ethers.utils.parseEther(payValue);
+      }
 
       contractWithSigner[name](...inputValues, option).then((result: any) => {
         if (readonly) {
@@ -87,7 +90,12 @@ export function ContractFunctionItem({
       <div className="card-body">
         <h2 className="card-title">{name}</h2>
         {payable && (
-          <h3 className="card-title">payable</h3>
+          <input
+            type="text"
+            placeholder="Payable amount (ETH)"
+            className="input input-bordered w-full max-w-x"
+            onChange={(e) => { setPayValue(e.target.value) }}
+          />
         )}
         {inputs.map((input, index) => {
           return (
