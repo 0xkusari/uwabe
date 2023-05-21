@@ -32,7 +32,7 @@ export function ContractFunctionItem({
 }: ContractFunction) {
 
   const [inputValues, setInputValues] = useState<string[]>([]);
-  const [readResult, setReadResult] = useState<any>(null);
+  const [result, setResult] = useState<any>(null);
 
   const [windowEthereum, setWindowEthereum] = useState();
 
@@ -48,7 +48,7 @@ export function ContractFunctionItem({
     setInputValues(newInputValues);
   };
 
-  const handleOnClick = (name: string) => {
+  const handleOnClick = (name: string, readonly: boolean) => {
     console.log(`${name}(${inputValues.join(",")})`);
     if (windowEthereum) {
       const provider = new ethers.providers.Web3Provider(windowEthereum);
@@ -66,9 +66,13 @@ export function ContractFunctionItem({
 
       const contractWithSigner = contract.connect(signer);
       contractWithSigner[name](...inputValues).then((result: any) => {
-        setReadResult(result.toString());
+        if (readonly) {
+          setResult(result.toString());
+        } else {
+          const etherscanTxUrl = `https://goerli.etherscan.io/tx/${result.hash}`;
+          setResult(etherscanTxUrl);
+        }
       });
-      // contractWithSigner[name](...inputValues).then(console.table);
     }
   };
 
@@ -90,7 +94,7 @@ export function ContractFunctionItem({
         <div className="card-actions justify-end">
           <button
             className="btn btn-primary"
-            onClick={() => handleOnClick(name)}
+            onClick={() => handleOnClick(name, readonly)}
           >
             {readonly ? "Query" : "Write"}
           </button>
@@ -98,7 +102,7 @@ export function ContractFunctionItem({
         {readonly && (
           <div>{`=> ${outputs.map((output) => output.type).join(",")}`}</div>
         )}
-        {readResult && <p className="alert shadow-lg">{readResult}</p>}
+        {result && <p className="alert shadow-lg">{result}</p>}
       </div>
     </div>
   );
