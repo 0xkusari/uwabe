@@ -75,6 +75,7 @@ export default function ConfigPage() {
           outputs: func.outputs,
           readonly:
             func.stateMutability === "view" || func.stateMutability === "pure",
+          payable: func.stateMutability === "payable",
           contractAddress: configTokenAddress,
           abi: results,
         };
