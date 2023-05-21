@@ -10,7 +10,6 @@ import { configTokenAddress, configTokenAbi } from "@/components/ConfigToken";
 
 export default function ContractAddress() {
   const router = useRouter();
-  // const { query } = router.query;
   const [query, setQuery] = useState<any>(null);
   const [slug, setSlug] = useState<string | null>(null);
   const [contractAddress, setContractAddress] = useState<string | null>(null);
@@ -61,8 +60,6 @@ export default function ContractAddress() {
     // Configオブジェクトには、以下が含まれる
     // - コントラクトアドレス
     // - 公開する関数のリスト
-    console.log("=============================================================")
-    console.log("fetchConfig")
 
     if (windowEthereum) {
       const provider = new ethers.providers.Web3Provider(windowEthereum);
