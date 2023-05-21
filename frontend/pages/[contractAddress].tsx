@@ -27,7 +27,6 @@ export default function ContractAddress() {
       const { ethereum } = window as any;
       setWindowEthereum(ethereum);
 
-      console.table(query);
       // コントラクトアドレスではない場合は、slugからコントラクトアドレスを取得する
       if (ethers.utils.isAddress(query.contractAddress)) {
         setContractAddress(query.contractAddress);
@@ -38,12 +37,10 @@ export default function ContractAddress() {
   }, [query, router]);
 
   useEffect(() => {
-    if (contractAddress) {
-      return;
-    } else if (slug) {
+    if (slug) {
       fetchConfig(windowEthereum);
     }
-  }, [windowEthereum]);
+  }, [windowEthereum, slug]);
 
   useEffect(() => {
     fetchContractData(contractAddress as string);
@@ -73,7 +70,7 @@ export default function ContractAddress() {
           );
 
       const contractWithSigner = contract.connect(signer);
-      contractWithSigner["slugToTokenId"](contractAddress).then((result: any) => {
+      contractWithSigner["slugToTokenId"](slug).then((result: any) => {
           console.log("Get from Config Token");
           console.table(result.toString());
 
@@ -85,10 +82,7 @@ export default function ContractAddress() {
               setContractAddress(config.attributes.filter((attr: any) => attr.trait_type === "Contract")[0].value);
           });
       });
-      // contractWithSigner[name](...inputValues).then(console.table);
     }
-
-    return [];
   };
 
   const fetchContractData = async (address: string) => {
@@ -124,7 +118,7 @@ export default function ContractAddress() {
 
     const exposeFunctions = config.attributes.filter((attr: any) => attr.trait_type === "Functions")[0].value.split(",");
     const filteredFunctions = contractFunctions.filter((contractFunction: ContractFunction) => {
-      exposeFunctions.includes(contractFunction.name);
+      return exposeFunctions.includes(contractFunction.name);
     });
 
     setFilteredFunctions(filteredFunctions as []);
