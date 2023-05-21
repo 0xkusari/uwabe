@@ -18,6 +18,7 @@ export interface ContractFunction {
   inputs: Input[];
   outputs: Output[];
   readonly: boolean;
+  payable: boolean;
   abi: any;
   contractAddress: string;
 }
@@ -27,6 +28,7 @@ export function ContractFunctionItem({
   inputs,
   outputs,
   readonly,
+  payable,
   contractAddress,
   abi,
 }: ContractFunction) {
@@ -80,6 +82,9 @@ export function ContractFunctionItem({
     <div className="card w-[40rem] bg-base-100 shadow-xl m-4">
       <div className="card-body">
         <h2 className="card-title">{name}</h2>
+        {payable && (
+          <h3 className="card-title">payable</h3>
+        )}
         {inputs.map((input, index) => {
           return (
             <input

@@ -101,6 +101,7 @@ export default function ContractAddress() {
           outputs: func.outputs,
           readonly:
             func.stateMutability === "view" || func.stateMutability === "pure",
+          payable: func.stateMutability === "payable",
           contractAddress: address,
           abi: results,
         };
