@@ -34,15 +34,16 @@ export function ContractFunctionItem({
 }: ContractFunction) {
 
   const [inputValues, setInputValues] = useState<string[]>([]);
+  const [payValue, setPayValue] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
 
   const [windowEthereum, setWindowEthereum] = useState();
 
   useEffect(() => {
-      const { ethereum } = window as any;
+    const { ethereum } = window as any;
 
-      setWindowEthereum(ethereum);
-      }, []);
+    setWindowEthereum(ethereum);
+  }, []);
 
   const updateInputValues = (index: number, value: string) => {
     const newInputValues = [...inputValues];
@@ -61,13 +62,16 @@ export function ContractFunctionItem({
       const signer = provider.getSigner();
 
       const contract = new ethers.Contract(
-          contractAddress,
-          abi,
-          provider
-          );
+        contractAddress,
+        abi,
+        provider
+      );
 
       const contractWithSigner = contract.connect(signer);
-      contractWithSigner[name](...inputValues).then((result: any) => {
+
+      const option = { value: ethers.utils.parseEther("0.001") };
+
+      contractWithSigner[name](...inputValues, option).then((result: any) => {
         if (readonly) {
           setResult(result.toString());
         } else {
@@ -92,7 +96,7 @@ export function ContractFunctionItem({
               type="text"
               placeholder={`${input.name} (${input.type})`}
               className="input input-bordered w-full max-w-x"
-              onChange={(e) => { updateInputValues(index, e.target.value)}}
+              onChange={(e) => { updateInputValues(index, e.target.value) }}
             />
           );
         })}
