@@ -6,47 +6,83 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import Link from 'next/link'
-
-const configTokenAbi = [{"inputs":[{"internalType":"address","name":"_designer","type":"address"},{"internalType":"address","name":"_programmer","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"designer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"_destination","type":"address"}],"name":"otoshidama","outputs":[],"stateMutability":"payable","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"programmer","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"_newBaseURI","type":"string"}],"name":"setBaseURI","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"}];
+import { configTokenAddress, configTokenAbi } from "@/components/ConfigToken";
 
 export default function ContractAddress() {
   const router = useRouter();
-  const { contractAddress } = router.query;
+  const [query, setQuery] = useState<any>(null);
+  const [slug, setSlug] = useState<string | null>(null);
+  const [contractAddress, setContractAddress] = useState<string | null>(null);
   const [contractFunctions, setContractFunctions] = useState<[] | null>(null);
+  const [filteredFunctions, setFilteredFunctions] = useState<[] | null>(null);
   const [windowEthereum, setWindowEthereum] = useState();
-  const [exposeFunctions, setExposeFunctions] = useState<string[]>([]);
+  const [config, setConfig] = useState(null);
 
   useEffect(() => {
-    const { ethereum } = window as any;
-    setWindowEthereum(ethereum);
+    setQuery(router.query);
+  }, [router]);
 
-    if (contractAddress) {
-      fetchContractData(contractAddress as string);
+  useEffect(() => {
+    if (query) {
+      const { ethereum } = window as any;
+      setWindowEthereum(ethereum);
+
+      // コントラクトアドレスではない場合は、slugからコントラクトアドレスを取得する
+      if (ethers.utils.isAddress(query.contractAddress)) {
+        setContractAddress(query.contractAddress);
+      } else {
+        setSlug(query.contractAddress);
+      }
     }
-  }, []);
+  }, [query, router]);
 
-  const fetchConfig = () => {
-    // if (windowEthereum) {
-    //   const provider = new ethers.providers.Web3Provider(windowEthereum);
-    //   provider.send('eth_requestAccounts', []).then(console.log);
-    //   const signer = provider.getSigner();
+  useEffect(() => {
+    if (slug) {
+      fetchConfig(windowEthereum);
+    }
+  }, [windowEthereum, slug]);
 
-    //   const contract = new ethers.Contract(
-    //     "0x8f79b3af00f2d002bc02841feefbd183aaca7067",
-    //     configTokenAbi,
-    //     provider
-    //   );
+  useEffect(() => {
+    fetchContractData(contractAddress as string);
+  }, [config, contractAddress]);
 
-    //   const contractWithSigner = contract.connect(signer);
-    //   contractWithSigner["designer"]([]).then((result: any) => {
-    //     console.log("Get from Config Token");
-    //     console.table(result.toString());
-    //   });
-    //   // contractWithSigner[name](...inputValues).then(console.table);
-    // }
+  useEffect(() => {
+    if (contractFunctions) {
+      filterFunctions(config, contractFunctions);
+    }
+  }, [contractFunctions]);
 
-    // here we can fetch the config from the contract
-    return [];
+  const fetchConfig = (windowEthereum: any) => {
+    // slugからtokenIDを取得して、コントラクトアドレスとConfigを取得してstateに保存する
+    // Configオブジェクトには、以下が含まれる
+    // - コントラクトアドレス
+    // - 公開する関数のリスト
+
+    if (windowEthereum) {
+      const provider = new ethers.providers.Web3Provider(windowEthereum);
+      provider.send('eth_requestAccounts', []).then(console.log);
+      const signer = provider.getSigner();
+
+      const contract = new ethers.Contract(
+          configTokenAddress, // ConfigTokenのアドレス
+          configTokenAbi,
+          provider
+          );
+
+      const contractWithSigner = contract.connect(signer);
+      contractWithSigner["slugToTokenId"](slug).then((result: any) => {
+          console.log("Get from Config Token");
+          console.table(result.toString());
+
+          contractWithSigner["tokenURI"](result.toString()).then((result: any) => {
+              const decodedData = Buffer.from(result.substring(29), 'base64').toString();
+              const config = JSON.parse(decodedData);
+              console.table(config);
+              setConfig(config);
+              setContractAddress(config.attributes.filter((attr: any) => attr.trait_type === "Contract")[0].value);
+          });
+      });
+    }
   };
 
   const fetchContractData = async (address: string) => {
@@ -65,15 +101,28 @@ export default function ContractAddress() {
           outputs: func.outputs,
           readonly:
             func.stateMutability === "view" || func.stateMutability === "pure",
+          payable: func.stateMutability === "payable",
           contractAddress: address,
           abi: results,
         };
       };
 
-      const exposeFunctions: any[] = fetchConfig();
-      const filtered = exposeFunctions.length > 0 ? functions.filter((func: any) => exposeFunctions?.indexOf(func.name) !== -1) : functions;
-      setContractFunctions(filtered.map(mapper));
+      setContractFunctions(functions.map(mapper));
     }
+  };
+
+  const filterFunctions = (config: any, contractFunctions: []) => {
+    if (!config) {
+      setFilteredFunctions(contractFunctions);
+      return;
+    }
+
+    const exposeFunctions = config.attributes.filter((attr: any) => attr.trait_type === "Functions")[0].value.split(",");
+    const filteredFunctions = contractFunctions.filter((contractFunction: ContractFunction) => {
+      return exposeFunctions.includes(contractFunction.name);
+    });
+
+    setFilteredFunctions(filteredFunctions as []);
   };
 
   return (
@@ -84,7 +133,7 @@ export default function ContractAddress() {
             Config for uwabe
           </Link>
           <ul>
-            {contractFunctions.map((contractFunction: ContractFunction) => (
+            {filteredFunctions?.map((contractFunction: ContractFunction) => (
               <li
                 key={`${contractFunction.name}_${contractFunction.inputs.length}_${contractFunction.outputs.length}_${contractFunction.readonly}`}
               >

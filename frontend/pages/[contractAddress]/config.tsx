@@ -45,7 +45,7 @@ export default function ConfigPage() {
     );
 
     const contractWithSigner = contract.connect(signer);
-    contractWithSigner["tokenURI"](0)
+    contractWithSigner["tokenURI"](0) // token_id 0, ConfigTokenを取得している
     .then((result: any) => {
       const decodedData = Buffer.from(result.substring(29), 'base64').toString()
       const functions = JSON.parse(decodedData).attributes.filter((attr: any) => attr.trait_type === "Functions")[0].value.split(",")
