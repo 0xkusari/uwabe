@@ -10,36 +10,60 @@ import { configTokenAddress, configTokenAbi } from "@/components/ConfigToken";
 
 export default function ContractAddress() {
   const router = useRouter();
-  const { query } = router.query;
-  const [contractAddress, setContractAddress] = useState(null);
+  // const { query } = router.query;
+  const [query, setQuery] = useState<any>(null);
+  const [slug, setSlug] = useState<string | null>(null);
+  const [contractAddress, setContractAddress] = useState<string | null>(null);
   const [contractFunctions, setContractFunctions] = useState<[] | null>(null);
+  const [filteredFunctions, setFilteredFunctions] = useState<[] | null>(null);
   const [windowEthereum, setWindowEthereum] = useState();
   const [config, setConfig] = useState(null);
 
   useEffect(() => {
-    const { ethereum } = window as any;
-    setWindowEthereum(ethereum);
+    setQuery(router.query);
+  }, [router]);
 
+  useEffect(() => {
     if (query) {
+      const { ethereum } = window as any;
+      setWindowEthereum(ethereum);
+
+      console.table(query);
       // コントラクトアドレスではない場合は、slugからコントラクトアドレスを取得する
-      if (ethers.utils.isAddress(query as string)) {
-        setContractAddress(query);
+      if (ethers.utils.isAddress(query.contractAddress)) {
+        setContractAddress(query.contractAddress);
+      } else {
+        setSlug(query.contractAddress);
       }
     }
-  }, []);
+  }, [query, router]);
 
   useEffect(() => {
     if (contractAddress) {
       return;
+    } else if (slug) {
+      fetchConfig(windowEthereum);
     }
-    fetchConfig(windowEthereum);
   }, [windowEthereum]);
 
   useEffect(() => {
     fetchContractData(contractAddress as string);
   }, [config, contractAddress]);
 
+  useEffect(() => {
+    if (contractFunctions) {
+      filterFunctions(config, contractFunctions);
+    }
+  }, [contractFunctions]);
+
   const fetchConfig = (windowEthereum: any) => {
+    // slugからtokenIDを取得して、コントラクトアドレスとConfigを取得してstateに保存する
+    // Configオブジェクトには、以下が含まれる
+    // - コントラクトアドレス
+    // - 公開する関数のリスト
+    console.log("=============================================================")
+    console.log("fetchConfig")
+
     if (windowEthereum) {
       const provider = new ethers.providers.Web3Provider(windowEthereum);
       provider.send('eth_requestAccounts', []).then(console.log);
@@ -66,6 +90,8 @@ export default function ContractAddress() {
       });
       // contractWithSigner[name](...inputValues).then(console.table);
     }
+
+    return [];
   };
 
   const fetchContractData = async (address: string) => {
@@ -89,10 +115,22 @@ export default function ContractAddress() {
         };
       };
 
-      const exposeFunctions: any[] = fetchConfig();
-      const filtered = exposeFunctions.length > 0 ? functions.filter((func: any) => exposeFunctions?.indexOf(func.name) !== -1) : functions;
-      setContractFunctions(filtered.map(mapper));
+      setContractFunctions(functions.map(mapper));
     }
+  };
+
+  const filterFunctions = (config: any, contractFunctions: []) => {
+    if (!config) {
+      setFilteredFunctions(contractFunctions);
+      return;
+    }
+
+    const exposeFunctions = config.attributes.filter((attr: any) => attr.trait_type === "Functions")[0].value.split(",");
+    const filteredFunctions = contractFunctions.filter((contractFunction: ContractFunction) => {
+      exposeFunctions.includes(contractFunction.name);
+    });
+
+    setFilteredFunctions(filteredFunctions as []);
   };
 
   return (
@@ -103,7 +141,7 @@ export default function ContractAddress() {
             Config for uwabe
           </Link>
           <ul>
-            {contractFunctions.map((contractFunction: ContractFunction) => (
+            {filteredFunctions?.map((contractFunction: ContractFunction) => (
               <li
                 key={`${contractFunction.name}_${contractFunction.inputs.length}_${contractFunction.outputs.length}_${contractFunction.readonly}`}
               >
